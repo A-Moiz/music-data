@@ -14,6 +14,12 @@ const tableHeaderUser = document.getElementById("table-header-user");
 
 const mostListenedCount = document.getElementById("most-listened-count");
 const mostListenedTime = document.getElementById("most-listened-time");
+const mostListenedArtist = document.getElementById(
+  "most-listened-artist-count",
+);
+const mostListenedArtistTime = document.getElementById(
+  "most-listened-artist-time",
+);
 
 const noDataMsg = document.getElementById("no-data-msg");
 const infoTable = document.querySelector(".info-table");
@@ -52,14 +58,22 @@ function renderData() {
 
   noDataMsg.hidden = true;
   infoTable.hidden = false;
-  const [topSongArtist, topSongTitle, topSongTimeArtist, topSongTimeTitle] =
-    getUserData(userID);
+  const [
+    topSongArtist,
+    topSongTitle,
+    topSongTimeArtist,
+    topSongTimeTitle,
+    topArtist,
+    topArtistTime,
+  ] = getUserData(userID);
 
   populateTable(
     topSongArtist,
     topSongTitle,
     topSongTimeArtist,
     topSongTimeTitle,
+    topArtist,
+    topArtistTime,
   );
 }
 
@@ -73,7 +87,18 @@ function getUserData(userID) {
 
   const topSongTimeArtist = getSong(topSongTimeID).artist;
   const topSongTimeTitle = getSong(topSongTimeID).title;
-  return [topSongArtist, topSongTitle, topSongTimeArtist, topSongTimeTitle];
+
+  const topArtist = getMostListenedArtist(userID);
+  const topArtistTime = getMostListenedArtistTime(userID);
+
+  return [
+    topSongArtist,
+    topSongTitle,
+    topSongTimeArtist,
+    topSongTimeTitle,
+    topArtist,
+    topArtistTime,
+  ];
 }
 
 // Get most listened song by count
@@ -99,15 +124,40 @@ function mostListenedSongTime(userID) {
   })[0][0];
 }
 
+// Get most listened artist
+function getMostListenedArtist(userID) {
+  const artistCounts = {};
+  for (const event of getListenEvents(userID)) {
+    const artist = getSong(event.song_id).artist;
+    artistCounts[artist] = (artistCounts[artist] ?? 0) + 1;
+  }
+  return Object.entries(artistCounts).sort(([, a], [, b]) => b - a)[0][0];
+}
+
+// Get most listened artist by time
+function getMostListenedArtistTime(userID) {
+  const artistTimes = {};
+  for (const event of getListenEvents(userID)) {
+    const song = getSong(event.song_id);
+    artistTimes[song.artist] =
+      (artistTimes[song.artist] ?? 0) + song.duration_seconds;
+  }
+  return Object.entries(artistTimes).sort(([, a], [, b]) => b - a)[0][0];
+}
+
 // Populate table with data
 function populateTable(
   topSongArtist,
   topSongTitle,
   topSongTimeArtist,
   topSongTimeTitle,
+  topArtist,
+  topArtistTime,
 ) {
   mostListenedCount.textContent = `${topSongArtist} - ${topSongTitle}`;
   mostListenedTime.textContent = `${topSongTimeArtist} - ${topSongTimeTitle}`;
+  mostListenedArtist.textContent = `${topArtist}`;
+  mostListenedArtistTime.textContent = `${topArtistTime}`;
 }
 
 init();
