@@ -20,9 +20,13 @@ const mostListenedArtist = document.getElementById(
 const mostListenedArtistTime = document.getElementById(
   "most-listened-artist-time",
 );
+const mostListenedFriday = document.getElementById("friday-song-count");
+const mostListenedFridayTime = document.getElementById("friday-song-time");
 
 const noDataMsg = document.getElementById("no-data-msg");
 const infoTable = document.querySelector(".info-table");
+const fridayCountRow = document.getElementById("friday-count-row");
+const fridayTimeRow = document.getElementById("friday-time-row");
 
 // Event listeners
 userSelect.addEventListener("change", renderData);
@@ -58,47 +62,37 @@ function renderData() {
 
   noDataMsg.hidden = true;
   infoTable.hidden = false;
-  const [
-    topSongArtist,
-    topSongTitle,
-    topSongTimeArtist,
-    topSongTimeTitle,
-    topArtist,
-    topArtistTime,
-  ] = getUserData(userID);
-
-  populateTable(
-    topSongArtist,
-    topSongTitle,
-    topSongTimeArtist,
-    topSongTimeTitle,
-    topArtist,
-    topArtistTime,
-  );
+  const data = getUserData(userID);
+  populateTable(data);
 }
 
 // Get user data
 function getUserData(userID) {
   const topSongID = mostListenedSongID(userID);
   const topSongTimeID = mostListenedSongTime(userID);
-
-  const topSongArtist = getSong(topSongID).artist;
-  const topSongTitle = getSong(topSongID).title;
-
-  const topSongTimeArtist = getSong(topSongTimeID).artist;
-  const topSongTimeTitle = getSong(topSongTimeID).title;
-
   const topArtist = getMostListenedArtist(userID);
   const topArtistTime = getMostListenedArtistTime(userID);
+  const topSongOnFridayID = getMostListenedOnFriday(userID);
+  const topSongOnFridayTimeID = getMostListenedOnFridayTime(userID);
 
-  return [
-    topSongArtist,
-    topSongTitle,
-    topSongTimeArtist,
-    topSongTimeTitle,
+  return {
+    topSongArtist: getSong(topSongID).artist,
+    topSongTitle: getSong(topSongID).title,
+    topSongTimeArtist: getSong(topSongTimeID).artist,
+    topSongTimeTitle: getSong(topSongTimeID).title,
     topArtist,
     topArtistTime,
-  ];
+    topFridayArtist: topSongOnFridayID
+      ? getSong(topSongOnFridayID).artist
+      : null,
+    topFridayTitle: topSongOnFridayID ? getSong(topSongOnFridayID).title : null,
+    topFridayTimeArtist: topSongOnFridayTimeID
+      ? getSong(topSongOnFridayTimeID).artist
+      : null,
+    topFridayTimeTitle: topSongOnFridayTimeID
+      ? getSong(topSongOnFridayTimeID).title
+      : null,
+  };
 }
 
 // Get most listened song by count
@@ -145,19 +139,62 @@ function getMostListenedArtistTime(userID) {
   return Object.entries(artistTimes).sort(([, a], [, b]) => b - a)[0][0];
 }
 
+// Check if date falls under Friday night (5pm - 4am)
+function isFridayNight(timestamp) {
+  const date = new Date(timestamp);
+  const day = date.getDay();
+  const hour = date.getHours();
+
+  // Day = 5 = Friday, Hour >= 17 = 5pm onwards
+  // Day 6 = Saturday, hour < 4 = Before 4am
+  // Thus checking if timestamp falls between 5pm and 4am on Friday/Saturday
+  return (day === 5 && hour >= 17) || (day === 6 && hour < 4);
+}
+
+// Get most listened song on Friday night
+function getMostListenedOnFriday(userID) {
+  const songCounts = {};
+  for (const event of getListenEvents(userID)) {
+    if (!isFridayNight(event.timestamp)) continue;
+    songCounts[event.song_id] = (songCounts[event.song_id] ?? 0) + 1;
+  }
+
+  if (Object.keys(songCounts).length === 0) return null;
+
+  return Object.entries(songCounts).sort(([, a], [, b]) => b - a)[0][0];
+}
+
+// Get most listened song on Friday night by time
+function getMostListenedOnFridayTime(userID) {
+  const songTimes = {};
+  for (const event of getListenEvents(userID)) {
+    if (!isFridayNight(event.timestamp)) continue;
+    const song = getSong(event.song_id);
+    songTimes[event.song_id] =
+      (songTimes[event.song_id] ?? 0) + song.duration_seconds;
+  }
+
+  if (Object.keys(songTimes).length === 0) return null;
+
+  return Object.entries(songTimes).sort(([, a], [, b]) => b - a)[0][0];
+}
+
 // Populate table with data
-function populateTable(
-  topSongArtist,
-  topSongTitle,
-  topSongTimeArtist,
-  topSongTimeTitle,
-  topArtist,
-  topArtistTime,
-) {
-  mostListenedCount.textContent = `${topSongArtist} - ${topSongTitle}`;
-  mostListenedTime.textContent = `${topSongTimeArtist} - ${topSongTimeTitle}`;
-  mostListenedArtist.textContent = `${topArtist}`;
-  mostListenedArtistTime.textContent = `${topArtistTime}`;
+function populateTable(data) {
+  mostListenedCount.textContent = `${data.topSongArtist} - ${data.topSongTitle}`;
+  mostListenedTime.textContent = `${data.topSongTimeArtist} - ${data.topSongTimeTitle}`;
+  mostListenedArtist.textContent = data.topArtist;
+  mostListenedArtistTime.textContent = data.topArtistTime;
+
+  if (data.topFridayArtist) {
+    fridayCountRow.hidden = false;
+    fridayTimeRow.hidden = false;
+    mostListenedFriday.textContent = `${data.topFridayArtist} - ${data.topFridayTitle}`;
+    mostListenedFridayTime.textContent = `${data.topFridayTimeArtist} - ${data.topFridayTimeTitle}`;
+  } else {
+    fridayCountRow.hidden = true;
+    fridayTimeRow.hidden = true;
+  }
 }
 
 init();
