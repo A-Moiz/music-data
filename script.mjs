@@ -4,8 +4,75 @@
 // Note that when running locally, in order to open a web page which uses modules, you must serve the directory over HTTP e.g. with https://www.npmjs.com/package/http-server
 // You can't open the index.html file using a file:// URL.
 
+// Imports
 import { countUsers } from "./common.mjs";
+import { getUserIDs, getListenEvents, getSong } from "./data.mjs";
 
-window.onload = function () {
-  document.querySelector("body").innerText = `There are ${countUsers()} users`;
-};
+// Get elements from HTML
+const userSelect = document.getElementById("user-select");
+const tableHeaderUser = document.getElementById("table-header-user");
+const mostListenedCount = document.getElementById("most-listened-count");
+const noDataMsg = document.getElementById("no-data-msg");
+const infoTable = document.querySelector(".info-table");
+
+// Event listeners
+userSelect.addEventListener("change", renderData);
+
+// Initialize function
+function init() {
+  createUserOptions();
+  renderData();
+}
+
+// Create user options
+function createUserOptions() {
+  const users = getUserIDs();
+  users.forEach((id) => {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = `User: ${id}`;
+    userSelect.appendChild(option);
+  });
+}
+
+// Render data
+function renderData() {
+  const userID = userSelect.value;
+  tableHeaderUser.textContent = `User ${userID}`;
+
+  const events = getListenEvents(userID);
+  if (events.length === 0) {
+    noDataMsg.hidden = false;
+    infoTable.hidden = true;
+    return;
+  }
+
+  noDataMsg.hidden = true;
+  infoTable.hidden = false;
+  const [topSongArtist, topSongTitle] = getUserData(userID);
+  populateTable(topSongArtist, topSongTitle);
+}
+
+// Get user data
+function getUserData(userID) {
+  const topSongID = mostListenedSongID(userID);
+  const topSongArtist = getSong(topSongID).artist;
+  const topSongTitle = getSong(topSongID).title;
+  return [topSongArtist, topSongTitle];
+}
+
+// Get most listened song by count
+function mostListenedSongID(userID) {
+  const songCounts = {};
+  for (const event of getListenEvents(userID)) {
+    songCounts[event.song_id] = (songCounts[event.song_id] ?? 0) + 1;
+  }
+  return Object.entries(songCounts).sort(([, a], [, b]) => b - a)[0][0];
+}
+
+// Populate table with data
+function populateTable(topSongArtist, topSongTitle) {
+  mostListenedCount.textContent = `${topSongArtist} - ${topSongTitle}`;
+}
+
+init();
