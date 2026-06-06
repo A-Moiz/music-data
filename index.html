@@ -1,7 +1,62 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <script type="module" src="script.mjs"></script>
+    <title>Music Data</title>
   </head>
-  <body></body>
+  <body>
+    <title>Music Data</title>
+    <main>
+      <div class="user-select">
+        <label for="user-select">Select User:</label>
+        <select id="user-select"></select>
+      </div>
+
+      <p id="no-data-msg" hidden>This user has no listening data.</p>
+      <div class="info-table">
+        <table>
+          <tr>
+            <th>Question:</th>
+            <th id="table-header-user">User:</th>
+          </tr>
+          <tr>
+            <td>Most listened song (count)</td>
+            <td id="most-listened-count"></td>
+          </tr>
+          <tr>
+            <td>Most listened song (time)</td>
+            <td id="most-listened-time"></td>
+          </tr>
+          <tr>
+            <td>Most listened artist (count)</td>
+            <td id="most-listened-artist-count"></td>
+          </tr>
+          <tr>
+            <td>Most listened artist (time)</td>
+            <td id="most-listened-artist-time"></td>
+          </tr>
+          <tr>
+            <td>Friday night song (count)</td>
+            <td id="friday-song-count"></td>
+          </tr>
+          <tr>
+            <td>Friday night song (time)</td>
+            <td id="friday-song-time"></td>
+          </tr>
+          <tr>
+            <td>Longest streak song</td>
+            <td id="longest-streak-song"></td>
+          </tr>
+          <tr>
+            <td>Every day songs</td>
+            <td id="everday-songs"></td>
+          </tr>
+          <tr>
+            <td>Top three genres</td>
+            <td id="top-three-genres"></td>
+          </tr>
+        </table>
+      </div>
+    </main>
+  </body>
 </html>
