@@ -1,12 +1,15 @@
 import { getListenEvents, getSong } from "./data.mjs";
 
-// Get most listened song by count
+// Get the ID of the song that was listened to the most times
 export function mostListenedSongID(userID) {
-  const songCounts = {};
+  // Creating an empty object
+  const songPlayCounts = {};
   for (const event of getListenEvents(userID)) {
-    songCounts[event.song_id] = (songCounts[event.song_id] ?? 0) + 1;
+    songPlayCounts[event.song_id] = (songPlayCounts[event.song_id] ?? 0) + 1;
   }
-  return Object.entries(songCounts).sort(([, a], [, b]) => b - a)[0][0];
+
+  if (Object.keys(songPlayCounts).length === 0) return null;
+  return Object.entries(songPlayCounts).sort(([, a], [, b]) => b - a)[0][0];
 }
 
 // Get most listened song by time
@@ -15,6 +18,9 @@ export function mostListenedSongTime(userID) {
   for (const event of getListenEvents(userID)) {
     songCounts[event.song_id] = (songCounts[event.song_id] ?? 0) + 1;
   }
+
+  // number of times song was listened to multiplied by duration
+  // of the song gives total time spent listening to that song
   return Object.entries(songCounts).sort(([idA, countA], [idB, countB]) => {
     const timeA = countA * getSong(idA).duration_seconds;
     const timeB = countB * getSong(idB).duration_seconds;
@@ -46,7 +52,7 @@ export function getMostListenedArtistTime(userID) {
 // Check if date falls under Friday night (5pm - 4am)
 export function isFridayNight(timestamp) {
   const date = new Date(timestamp);
-  const day = date.getDay();
+  const day = date.getDay(); // Sunday - Saturday : 0 - 6 [1]
   const hour = date.getHours();
   return (day === 5 && hour >= 17) || (day === 6 && hour < 4);
 }
@@ -55,7 +61,7 @@ export function isFridayNight(timestamp) {
 export function getMostListenedOnFriday(userID) {
   const songCounts = {};
   for (const event of getListenEvents(userID)) {
-    if (!isFridayNight(event.timestamp)) continue;
+    if (!isFridayNight(event.timestamp)) continue; // If it's Friday night ignore it
     songCounts[event.song_id] = (songCounts[event.song_id] ?? 0) + 1;
   }
   if (Object.keys(songCounts).length === 0) return null;
@@ -74,3 +80,6 @@ export function getMostListenedOnFridayTime(userID) {
   if (Object.keys(songTimes).length === 0) return null;
   return Object.entries(songTimes).sort(([, a], [, b]) => b - a)[0][0];
 }
+
+// Reference:
+// [1] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getDay
