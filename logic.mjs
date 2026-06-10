@@ -81,5 +81,34 @@ export function getMostListenedOnFridayTime(userID) {
   return Object.entries(songTimes).sort(([, a], [, b]) => b - a)[0][0];
 }
 
+// Finding longest streak song
+export function highestStreakSongID(userID) {
+  const events = getListenEvents(userID);
+  if (events.length === 0) return null;
+
+  let bestSongID = events[0].song_id;
+  let bestStreak = 1;
+
+  let currentSongID = events[0].song_id;
+  let currentStreak = 1;
+
+  for (let i = 1; i < events.length; i++) {
+    const songID = events[i].song_id;
+    if (songID === currentSongID) {
+      currentStreak += 1;
+    } else {
+      currentSongID = songID;
+      currentStreak = 1;
+    }
+
+    if (currentStreak > bestStreak) {
+      bestStreak = currentStreak;
+      bestSongID = currentSongID;
+    }
+  }
+
+  return [bestSongID, bestStreak];
+}
+
 // Reference:
 // [1] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getDay
