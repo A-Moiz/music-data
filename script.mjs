@@ -10,6 +10,7 @@ import {
   getMostListenedOnFridayTime,
   highestStreakSongID,
   getTopGenres,
+  everydaySongs,
 } from "./logic.mjs";
 
 // Get elements from HTML
@@ -28,6 +29,7 @@ const mostListenedFriday = document.getElementById("friday-song-count");
 const mostListenedFridayTime = document.getElementById("friday-song-time");
 const longestStreakSongField = document.getElementById("longest-streak-song");
 const topGenresField = document.getElementById("top-genres");
+const everydaySongsField = document.getElementById("everyday-songs");
 
 const noDataMsg = document.getElementById("no-data-msg");
 const infoTable = document.querySelector(".info-table");
@@ -91,6 +93,7 @@ function getUserData(userID) {
   const topSongOnFridayTimeID = getMostListenedOnFridayTime(userID);
   const [longestStreakSongID, bestStreak] = highestStreakSongID(userID);
   const userGenreCount = getTopGenres(userID);
+  const userEverydaySong = everydaySongs(userID);
 
   return {
     topSongArtist: topSongID ? getSong(topSongID).artist : null,
@@ -113,6 +116,11 @@ function getUserData(userID) {
     longestStreakSong: getSong(longestStreakSongID).title,
     bestStreak: bestStreak,
     userGenreCount: userGenreCount,
+    userEverydaySongs: userEverydaySong
+      ? userEverydaySong.map(
+          (id) => `${getSong(id).artist} - ${getSong(id).title}`,
+        )
+      : null,
   };
 }
 
@@ -135,6 +143,13 @@ function populateTable(data) {
 
   longestStreakSongField.textContent = `${data.longestStreakSongArtist} - ${data.longestStreakSong} (Longest streak: ${data.bestStreak})`;
   topGenresField.textContent = `${data.userGenreCount.join(", ")}`;
+
+  if (data.userEverydaySongs) {
+    everydaySongsRow.hidden = false;
+    everydaySongsField.textContent = data.userEverydaySongs.join(", ");
+  } else {
+    everydaySongsRow.hidden = true;
+  }
 }
 
 init();
