@@ -35,15 +35,9 @@ const noDataMsg = document.getElementById("no-data-msg");
 const infoTable = document.querySelector(".info-table");
 
 // Table rows
-const mostListenedCountRow = document.getElementById("most-listened-count-row");
-const mostListenedTimeRow = document.getElementById("most-listened-time-row");
-const artistCountRow = document.getElementById("artist-count-row");
-const artistTimeRow = document.getElementById("artist-time-row");
 const fridayCountRow = document.getElementById("friday-count-row");
 const fridayTimeRow = document.getElementById("friday-time-row");
-const longestStreakSongRow = document.getElementById("longest-streak-row");
 const everydaySongsRow = document.getElementById("everyday-songs-row");
-const topGenresRow = document.getElementById("top-genres-row");
 
 // Event listeners
 userSelect.addEventListener("change", renderData);
