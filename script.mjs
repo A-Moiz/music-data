@@ -1,9 +1,3 @@
-// This is a placeholder file which shows how you can access functions defined in other files.
-// It can be loaded into index.html.
-// You can delete the contents of the file once you have understood how it works.
-// Note that when running locally, in order to open a web page which uses modules, you must serve the directory over HTTP e.g. with https://www.npmjs.com/package/http-server
-// You can't open the index.html file using a file:// URL.
-
 // Imports
 import { countUsers } from "./common.mjs";
 import { getUserIDs, getListenEvents, getSong } from "./data.mjs";
@@ -37,9 +31,17 @@ const topGenresField = document.getElementById("top-genres");
 
 const noDataMsg = document.getElementById("no-data-msg");
 const infoTable = document.querySelector(".info-table");
+
+// Table rows
+const mostListenedCountRow = document.getElementById("most-listened-count-row");
+const mostListenedTimeRow = document.getElementById("most-listened-time-row");
+const artistCountRow = document.getElementById("artist-count-row");
+const artistTimeRow = document.getElementById("artist-time-row");
 const fridayCountRow = document.getElementById("friday-count-row");
 const fridayTimeRow = document.getElementById("friday-time-row");
 const longestStreakSongRow = document.getElementById("longest-streak-row");
+const everydaySongsRow = document.getElementById("everyday-songs-row");
+const topGenresRow = document.getElementById("top-genres-row");
 
 // Event listeners
 userSelect.addEventListener("change", renderData);
@@ -91,10 +93,10 @@ function getUserData(userID) {
   const userGenreCount = getTopGenres(userID);
 
   return {
-    topSongArtist: getSong(topSongID).artist,
-    topSongTitle: getSong(topSongID).title,
-    topSongTimeArtist: getSong(topSongTimeID).artist,
-    topSongTimeTitle: getSong(topSongTimeID).title,
+    topSongArtist: topSongID ? getSong(topSongID).artist : null,
+    topSongTitle: topSongID ? getSong(topSongID).title : null,
+    topSongTimeArtist: topSongTimeID ? getSong(topSongTimeID).artist : null,
+    topSongTimeTitle: topSongTimeID ? getSong(topSongTimeID).title : null,
     topArtist,
     topArtistTime,
     topFridayArtist: topSongOnFridayID
