@@ -3,7 +3,10 @@ import { getListenEvents, getSong } from "./data.mjs";
 // Get the ID of the song that was listened to the most times
 export function mostListenedSongID(userID) {
   const songPlayCounts = {};
-  for (const event of getListenEvents(userID)) {
+  const events = getListenEvents(userID);
+  if (events.length === 0) return null;
+
+  for (const event of events) {
     songPlayCounts[event.song_id] = (songPlayCounts[event.song_id] ?? 0) + 1;
   }
 
@@ -14,7 +17,10 @@ export function mostListenedSongID(userID) {
 // Get most listened song by time
 export function mostListenedSongTime(userID) {
   const songCounts = {};
-  for (const event of getListenEvents(userID)) {
+  const events = getListenEvents(userID);
+  if (events.length === 0) return null;
+
+  for (const event of events) {
     songCounts[event.song_id] = (songCounts[event.song_id] ?? 0) + 1;
   }
 
@@ -30,21 +36,29 @@ export function mostListenedSongTime(userID) {
 // Get most listened artist by count
 export function getMostListenedArtist(userID) {
   const artistCounts = {};
-  for (const event of getListenEvents(userID)) {
+  const events = getListenEvents(userID);
+  if (events.length === 0) return null;
+
+  for (const event of events) {
     const artist = getSong(event.song_id).artist;
     artistCounts[artist] = (artistCounts[artist] ?? 0) + 1;
   }
+
   return Object.entries(artistCounts).sort(([, a], [, b]) => b - a)[0][0];
 }
 
 // Get most listened artist by time
 export function getMostListenedArtistTime(userID) {
   const artistTimes = {};
-  for (const event of getListenEvents(userID)) {
+  const events = getListenEvents(userID);
+  if (events.length === 0) return null;
+
+  for (const event of events) {
     const song = getSong(event.song_id);
     artistTimes[song.artist] =
       (artistTimes[song.artist] ?? 0) + song.duration_seconds;
   }
+
   return Object.entries(artistTimes).sort(([, a], [, b]) => b - a)[0][0];
 }
 
@@ -59,10 +73,14 @@ export function isFridayNight(timestamp) {
 // Get most listened song on Friday night by count
 export function getMostListenedOnFriday(userID) {
   const songCounts = {};
-  for (const event of getListenEvents(userID)) {
-    if (!isFridayNight(event.timestamp)) continue; // If it's Friday night ignore it
+  const events = getListenEvents(userID);
+  if (events.length === 0) return null;
+
+  for (const event of events) {
+    if (!isFridayNight(event.timestamp)) continue;
     songCounts[event.song_id] = (songCounts[event.song_id] ?? 0) + 1;
   }
+
   if (Object.keys(songCounts).length === 0) return null;
   return Object.entries(songCounts).sort(([, a], [, b]) => b - a)[0][0];
 }
@@ -70,12 +88,16 @@ export function getMostListenedOnFriday(userID) {
 // Get most listened song on Friday night by time
 export function getMostListenedOnFridayTime(userID) {
   const songTimes = {};
-  for (const event of getListenEvents(userID)) {
+  const events = getListenEvents(userID);
+  if (events.length === 0) return null;
+
+  for (const event of events) {
     if (!isFridayNight(event.timestamp)) continue;
     const song = getSong(event.song_id);
     songTimes[event.song_id] =
       (songTimes[event.song_id] ?? 0) + song.duration_seconds;
   }
+
   if (Object.keys(songTimes).length === 0) return null;
   return Object.entries(songTimes).sort(([, a], [, b]) => b - a)[0][0];
 }
