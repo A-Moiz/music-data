@@ -105,11 +105,14 @@ export function getMostListenedOnFridayTime(userID) {
 // Finding longest streak song
 export function highestStreakSongID(userID) {
   const events = getListenEvents(userID);
+  return calculateHighestStreak(events);
+}
+
+export function calculateHighestStreak(events) {
   if (events.length === 0) return null;
 
   let bestSongID = events[0].song_id;
   let bestStreak = 1;
-
   let currentSongID = events[0].song_id;
   let currentStreak = 1;
 
@@ -121,7 +124,6 @@ export function highestStreakSongID(userID) {
       currentSongID = songID;
       currentStreak = 1;
     }
-
     if (currentStreak > bestStreak) {
       bestStreak = currentStreak;
       bestSongID = currentSongID;
