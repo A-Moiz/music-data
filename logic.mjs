@@ -149,5 +149,39 @@ export function getTopGenres(userID) {
     .map(([genre]) => genre);
 }
 
+// Getting everyday songs
+export function everydaySongs(userID) {
+  const events = getListenEvents(userID);
+  if (events.length === 0) return null;
+
+  const allDays = [];
+  for (const event of events) {
+    const day = new Date(event.timestamp).toDateString();
+    if (!allDays.includes(day)) {
+      allDays.push(day);
+    }
+  }
+
+  const songDays = {};
+  for (const event of events) {
+    const day = new Date(event.timestamp).toDateString();
+    if (!songDays[event.song_id]) {
+      songDays[event.song_id] = [];
+    }
+    if (!songDays[event.song_id].includes(day)) {
+      songDays[event.song_id].push(day);
+    }
+  }
+
+  const qualifyingSongs = [];
+  for (const [songID, days] of Object.entries(songDays)) {
+    if (days.length === allDays.length) {
+      qualifyingSongs.push(songID);
+    }
+  }
+
+  return qualifyingSongs.length > 0 ? qualifyingSongs : null;
+}
+
 // Reference:
 // [1] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getDay
