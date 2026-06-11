@@ -2,7 +2,6 @@ import { getListenEvents, getSong } from "./data.mjs";
 
 // Get the ID of the song that was listened to the most times
 export function mostListenedSongID(userID) {
-  // Creating an empty object
   const songPlayCounts = {};
   for (const event of getListenEvents(userID)) {
     songPlayCounts[event.song_id] = (songPlayCounts[event.song_id] ?? 0) + 1;
@@ -108,6 +107,24 @@ export function highestStreakSongID(userID) {
   }
 
   return [bestSongID, bestStreak];
+}
+
+// Finding top genres
+export function getTopGenres(userID) {
+  const events = getListenEvents(userID) || [];
+  const genreCounts = {};
+
+  for (const event of events) {
+    const genre = getSong(event.song_id)?.genre;
+    if (genre) {
+      genreCounts[genre] = (genreCounts[genre] ?? 0) + 1;
+    }
+  }
+
+  return Object.entries(genreCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([genre]) => genre);
 }
 
 // Reference:
